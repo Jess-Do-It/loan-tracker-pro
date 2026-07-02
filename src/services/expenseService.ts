@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 import type { Expense, ExpenseInput, RecurringExpense } from "@/types/expense";
 import { mockExpenses, mockRecurring } from "@/lib/mockExpenses";
+import { hydrate, persist } from "./persistence";
+import { persistExpense, removeExpense } from "./dataFns";
 
 let expenses: Expense[] = [...mockExpenses];
 let recurring: RecurringExpense[] = [...mockRecurring];
@@ -13,6 +15,22 @@ const subscribe = (l: Listener) => {
 listeners.add(l);
 return () => listeners.delete(l);
 };
+
+hydrate((snap) => {
+expenses = snap.expenses;
+recurring = snap.recurring;
+nextId = Math.max(0, ...expenses.map((e) => e.id)) + 1;
+emit();
+});
+
+// Remove every expense matching a predicate and mirror each deletion to the DB.
+function removeMatching(pred: (e: Expense) => boolean) {
+const toRemove = expenses.filter(pred);
+if (toRemove.length === 0) return;
+expenses = expenses.filter((e) => !pred(e));
+emit();
+toRemove.forEach((e) => persist(() => removeExpense({ data: e.id })));
+}
 
 export function getExpenses() {
 return expenses;
@@ -29,12 +47,14 @@ export function addExpense(input: ExpenseInput): Expense {
 const e: Expense = { ...input, id: nextId++ };
 expenses = [e, ...expenses];
 emit();
+persist(() => persistExpense({ data: e }));
 return e;
 }
 
 export function deleteExpense(id: number) {
 expenses = expenses.filter((e) => e.id !== id);
 emit();
+persist(() => removeExpense({ data: id }));
 }
 
 export function isRecurringRecorded(recurringId: number, monthK: string) {
@@ -70,10 +90,7 @@ date: todayIso(),
 recurringId: r.id,
 });
 } else if (!shouldExist && exists) {
-expenses = expenses.filter(
-(e) => !(e.recurringId === recurringId && e.date.startsWith(monthK)),
-);
-emit();
+removeMatching((e) => e.recurringId === recurringId && e.date.startsWith(monthK));
 }
 }
 
@@ -95,10 +112,7 @@ date: todayIso(),
 sourceLoanId: loanId,
 });
 } else if (!shouldExist && exists) {
-expenses = expenses.filter(
-(e) => !(e.sourceLoanId === loanId && e.date.startsWith(monthK)),
-);
-emit();
+removeMatching((e) => e.sourceLoanId === loanId && e.date.startsWith(monthK));
 }
 }
 

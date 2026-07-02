@@ -2,11 +2,13 @@ import { useSyncExternalStore } from "react";
 import type { Loan, LoanInput } from "@/types/loan";
 import { mockLoans } from "@/lib/mockLoans";
 import { calculateLoanPreview } from "@/lib/loanCalculations";
+import { hydrate, persist } from "./persistence";
+import { persistLoan } from "./dataFns";
 
 /**
-* Placeholder loan service. Backed by in-memory mock state today,
-* designed so the call sites can later swap to real SQLite without
-* changes to UI components.
+* Loan service. Seeds from mock data for the initial (SSR-matching) render,
+* then hydrates from and writes through to the SQLite database so every change
+* persists. UI call sites use the same synchronous API as before.
 */
 
 let loans: Loan[] = [...mockLoans];
@@ -23,6 +25,13 @@ function subscribe(l: Listener) {
 listeners.add(l);
 return () => listeners.delete(l);
 }
+
+// Replace the seed data with persisted rows once the DB snapshot arrives.
+hydrate((snap) => {
+loans = snap.loans;
+nextId = Math.max(0, ...loans.map((l) => l.id)) + 1;
+emit();
+});
 
 export function getLoans(): Loan[] {
 return loans;
@@ -46,6 +55,7 @@ isActive: true,
 };
 loans = [loan, ...loans];
 emit();
+persist(() => persistLoan({ data: loan }));
 return loan;
 }
 
@@ -58,12 +68,19 @@ updated = { ...l, ...input, ...calc };
 return updated;
 });
 emit();
+if (updated) persist(() => persistLoan({ data: updated as Loan }));
 return updated;
 }
 
 export function archiveLoan(id: number) {
-loans = loans.map((l) => (l.id === id ? { ...l, isActive: false } : l));
+let archived: Loan | undefined;
+loans = loans.map((l) => {
+if (l.id !== id) return l;
+archived = { ...l, isActive: false };
+return archived;
+});
 emit();
+if (archived) persist(() => persistLoan({ data: archived as Loan }));
 }
 
 // React hook wrapper
