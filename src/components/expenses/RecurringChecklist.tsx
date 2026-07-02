@@ -1,23 +1,36 @@
 import { useEffect, useRef, useState } from "react";
-import { useLoans } from "@/services/loanService";
+import { Trash2 } from "lucide-react";
+import { useLoans, hideLoanEmi } from "@/services/loanService";
 import {
 useRecurring,
 isRecurringRecorded,
 isLoanRecorded,
 toggleRecurringRecorded,
 toggleLoanRecorded,
+deleteRecurring,
 useExpenses,
 } from "@/services/expenseService";
 import { CategoryIcon } from "@/components/expenses/CategoryIcon";
 import { MoneyText } from "@/components/common/MoneyText";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+AlertDialog,
+AlertDialogTrigger,
+AlertDialogContent,
+AlertDialogHeader,
+AlertDialogFooter,
+AlertDialogTitle,
+AlertDialogDescription,
+AlertDialogAction,
+AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 const REMOVE_DELAY_MS = 350;
 
 export function RecurringChecklist({ monthK }: { monthK: string }) {
 useExpenses();
 const recurring = useRecurring();
-const loans = useLoans().filter((l) => l.isActive);
+const loans = useLoans().filter((l) => l.isActive && l.emiInRecurring !== false);
 
 // Local optimistic checked state -> commits to service after a short delay
 // so the user sees the check animation before the row disappears.
@@ -65,6 +78,9 @@ onCheck: () =>
 scheduleCommit(key, () =>
 toggleLoanRecorded(l.id, l.name, l.monthlyPayment, monthK, l.dueDay ?? 1, true),
 ),
+// Delete hides this loan's EMI from the recurring checklist (the loan itself
+// stays active elsewhere).
+onDelete: () => hideLoanEmi(l.id),
 };
 }),
 ...recurring.map((r) => {
@@ -78,6 +94,7 @@ recorded: isRecurringRecorded(r.id, monthK),
 sub: `Day ${r.dayOfMonth}`,
 onCheck: () =>
 scheduleCommit(key, () => toggleRecurringRecorded(r.id, monthK, true)),
+onDelete: () => deleteRecurring(r.id),
 };
 }),
 ].filter((i) => !i.recorded);
@@ -134,6 +151,43 @@ isPending ? "line-through" : ""
 value={it.amount}
 className="text-sm font-semibold"
 />
+{it.onDelete ? (
+<AlertDialog>
+<AlertDialogTrigger asChild>
+<button
+type="button"
+disabled={isPending}
+className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+aria-label={`Delete recurring ${it.name}`}
+>
+<Trash2 className="size-4" />
+</button>
+</AlertDialogTrigger>
+<AlertDialogContent>
+<AlertDialogHeader>
+<AlertDialogTitle>
+{it.key.startsWith("loan-")
+? "Remove EMI reminder?"
+: "Delete recurring payment?"}
+</AlertDialogTitle>
+<AlertDialogDescription>
+{it.key.startsWith("loan-")
+? `“${it.name}” will be hidden from the recurring checklist for this and all future months. The loan itself is not affected.`
+: `“${it.name}” will be removed from this and all future months. Payments already recorded in past months are kept.`}
+</AlertDialogDescription>
+</AlertDialogHeader>
+<AlertDialogFooter>
+<AlertDialogCancel>Cancel</AlertDialogCancel>
+<AlertDialogAction
+onClick={it.onDelete}
+className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+>
+Delete
+</AlertDialogAction>
+</AlertDialogFooter>
+</AlertDialogContent>
+</AlertDialog>
+) : null}
 </li>
 );
 })}

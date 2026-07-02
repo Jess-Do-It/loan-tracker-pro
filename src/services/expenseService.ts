@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from "react";
 import type { Expense, ExpenseInput, RecurringExpense } from "@/types/expense";
 import { mockExpenses, mockRecurring } from "@/lib/mock-data/mockExpenses";
-import { isoDate } from "@/lib/dateHelpers";
+import { dateInMonth } from "@/lib/dateHelpers";
 import { hydrate, persist } from "./persistence";
-import { persistExpense, removeExpense, persistRecurring } from "./dataFns";
+import { persistExpense, removeExpense, persistRecurring, removeRecurring } from "./dataFns";
 import { addLoanPayment } from "./loanService";
 import { addSavingsContribution } from "./savingsService";
 
@@ -28,13 +28,24 @@ nextRecurringId = Math.max(0, ...recurring.map((r) => r.id)) + 1;
 emit();
 });
 
-// Remove every expense matching a predicate and mirror each deletion to the DB.
+// Undo the loan/savings side effect an expense applied when it was recorded:
+// subtract its amount back out of the loan's totalPaid or the goal's currentAmount.
+function reverseExpenseEffect(e: Expense) {
+if (e.sourceLoanId != null) addLoanPayment(e.sourceLoanId, -e.amount);
+else if (e.sourceSavingsId != null) addSavingsContribution(e.sourceSavingsId, -e.amount);
+}
+
+// Remove every expense matching a predicate, mirror each deletion to the DB, and
+// reverse any loan/savings contribution it made.
 function removeMatching(pred: (e: Expense) => boolean) {
 const toRemove = expenses.filter(pred);
 if (toRemove.length === 0) return;
 expenses = expenses.filter((e) => !pred(e));
 emit();
-toRemove.forEach((e) => persist(() => removeExpense({ data: e.id })));
+toRemove.forEach((e) => {
+persist(() => removeExpense({ data: e.id }));
+reverseExpenseEffect(e);
+});
 }
 
 export function getExpenses() {
@@ -63,6 +74,15 @@ recurring = [r, ...recurring];
 emit();
 persist(() => persistRecurring({ data: r }));
 return r;
+}
+
+// Delete a recurring template. It stops appearing as a task in the current and
+// all future months. Already-recorded expenses in past months are left intact
+// as history.
+export function deleteRecurring(id: number) {
+recurring = recurring.filter((r) => r.id !== id);
+emit();
+persist(() => removeRecurring({ data: id }));
 }
 
 /**
@@ -101,9 +121,13 @@ return e;
 }
 
 export function deleteExpense(id: number) {
+const removed = expenses.find((e) => e.id === id);
 expenses = expenses.filter((e) => e.id !== id);
 emit();
 persist(() => removeExpense({ data: id }));
+// If this record was a loan payment / savings contribution, take the amount
+// back out of the loan's totalPaid / goal's currentAmount.
+if (removed) reverseExpenseEffect(removed);
 }
 
 export function isRecurringRecorded(recurringId: number, monthK: string) {
@@ -116,10 +140,6 @@ export function isLoanRecorded(loanId: number, monthK: string) {
 return expenses.some(
 (e) => e.sourceLoanId === loanId && e.date.startsWith(monthK),
 );
-}
-
-function todayIso() {
-return isoDate(new Date());
 }
 
 export function toggleRecurringRecorded(
@@ -135,7 +155,7 @@ addExpense({
 name: r.name,
 amount: r.amount,
 category: r.category,
-date: todayIso(),
+date: dateInMonth(monthK, r.dayOfMonth),
 recurringId: r.id,
 });
 } else if (!shouldExist && exists) {
@@ -148,7 +168,7 @@ loanId: number,
 loanName: string,
 amount: number,
 monthK: string,
-_dayOfMonth: number,
+dayOfMonth: number,
 shouldExist: boolean,
 ) {
 const exists = isLoanRecorded(loanId, monthK);
@@ -157,9 +177,12 @@ addExpense({
 name: `${loanName} EMI`,
 amount,
 category: "loan",
-date: todayIso(),
+date: dateInMonth(monthK, dayOfMonth),
 sourceLoanId: loanId,
 });
+// Recording an EMI is a payment toward the loan, so count it in totalPaid
+// (removeMatching reverses this on uncheck / delete).
+addLoanPayment(loanId, amount);
 } else if (!shouldExist && exists) {
 removeMatching((e) => e.sourceLoanId === loanId && e.date.startsWith(monthK));
 }

@@ -52,6 +52,7 @@ id: nextId++,
 ...input,
 ...calc,
 isActive: true,
+emiInRecurring: true,
 };
 loans = [loan, ...loans];
 emit();
@@ -79,6 +80,20 @@ let updated: Loan | undefined;
 loans = loans.map((l) => {
 if (l.id !== id) return l;
 updated = { ...l, totalPaid: l.totalPaid + amount };
+return updated;
+});
+emit();
+if (updated) persist(() => persistLoan({ data: updated as Loan }));
+return updated;
+}
+
+// Hide a loan's EMI from the recurring checklist (current + future months). The
+// loan itself stays active and visible everywhere else.
+export function hideLoanEmi(id: number): Loan | undefined {
+let updated: Loan | undefined;
+loans = loans.map((l) => {
+if (l.id !== id) return l;
+updated = { ...l, emiInRecurring: false };
 return updated;
 });
 emit();

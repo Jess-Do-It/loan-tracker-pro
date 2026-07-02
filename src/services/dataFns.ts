@@ -50,6 +50,13 @@ export const persistRecurring = createServerFn({ method: "POST" })
     upsertRecurring(data);
   });
 
+export const removeRecurring = createServerFn({ method: "POST" })
+  .validator((id: number) => id)
+  .handler(async ({ data }) => {
+    const { deleteRecurringRow } = await import("@/server/db");
+    deleteRecurringRow(data);
+  });
+
 export const persistSavings = createServerFn({ method: "POST" })
   .validator((goal: SavingsGoal) => goal)
   .handler(async ({ data }) => {

@@ -84,7 +84,8 @@ function migrate(d: SqliteDb) {
       totalFees          REAL    NOT NULL,
       totalPayable       REAL    NOT NULL,
       totalCost          REAL    NOT NULL,
-      isActive           INTEGER NOT NULL DEFAULT 1
+      isActive           INTEGER NOT NULL DEFAULT 1,
+      emiInRecurring     INTEGER NOT NULL DEFAULT 1
     );
 
     CREATE TABLE IF NOT EXISTS expenses (
@@ -130,6 +131,7 @@ function migrate(d: SqliteDb) {
 
   // Additive migrations for databases created before a column existed.
   ensureColumn(d, "loans", "totalPaid", "REAL NOT NULL DEFAULT 0");
+  ensureColumn(d, "loans", "emiInRecurring", "INTEGER NOT NULL DEFAULT 1");
   ensureColumn(d, "expenses", "sourceSavingsId", "INTEGER");
 }
 
@@ -183,6 +185,7 @@ function rowToLoan(r: Record<string, unknown>): Loan {
     totalPayable: r.totalPayable as number,
     totalCost: r.totalCost as number,
     isActive: !!r.isActive,
+    emiInRecurring: r.emiInRecurring == null ? true : !!r.emiInRecurring,
   };
 }
 
@@ -241,13 +244,13 @@ function insertLoan(d: SqliteDb, l: Loan) {
     `INSERT OR REPLACE INTO loans
       (id, name, loanType, lender, currentBalance, totalPaid, monthlyPayment, annualInterestRate,
        monthlyFee, dueDay, isAutopay, notes, monthsToPayoff, yearsToPayoff, remainingMonths,
-       totalInterest, totalFees, totalPayable, totalCost, isActive)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+       totalInterest, totalFees, totalPayable, totalCost, isActive, emiInRecurring)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   ).run(
     l.id, l.name, l.loanType, opt(l.lender), l.currentBalance, l.totalPaid, l.monthlyPayment,
     l.annualInterestRate, l.monthlyFee, opt(l.dueDay), bool(l.isAutopay), opt(l.notes),
     l.monthsToPayoff, l.yearsToPayoff, l.remainingMonths, l.totalInterest, l.totalFees,
-    l.totalPayable, l.totalCost, bool(l.isActive),
+    l.totalPayable, l.totalCost, bool(l.isActive), l.emiInRecurring === false ? 0 : 1,
   );
 }
 
@@ -300,6 +303,10 @@ export function upsertLoan(l: Loan) {
 
 export function upsertRecurring(r: RecurringExpense) {
   insertRecurring(getDb(), r);
+}
+
+export function deleteRecurringRow(id: number) {
+  getDb().prepare("DELETE FROM recurring WHERE id = ?").run(id);
 }
 
 export function deleteLoanRow(id: number) {

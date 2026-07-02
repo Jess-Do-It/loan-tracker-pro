@@ -26,6 +26,7 @@ totalPayable: number;
 totalCost: number;
 
 isActive: boolean;
+emiInRecurring?: boolean; // false = hidden from the recurring checklist (default true)
 };
 
 export type LoanInput = {
