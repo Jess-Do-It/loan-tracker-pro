@@ -126,7 +126,8 @@ placeholder="Bank, store, person…"
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.currentBalance}
+placeholder="0"
+value={form.currentBalance === 0 ? "" : form.currentBalance}
 onChange={(e) => set("currentBalance", Number(e.target.value))}
 />
 </Field>
@@ -135,7 +136,8 @@ onChange={(e) => set("currentBalance", Number(e.target.value))}
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.totalPaid}
+placeholder="0"
+value={form.totalPaid === 0 ? "" : form.totalPaid}
 onChange={(e) => set("totalPaid", Number(e.target.value))}
 />
 </Field>
@@ -144,7 +146,8 @@ onChange={(e) => set("totalPaid", Number(e.target.value))}
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.monthlyPayment}
+placeholder="0"
+value={form.monthlyPayment === 0 ? "" : form.monthlyPayment}
 onChange={(e) => set("monthlyPayment", Number(e.target.value))}
 />
 </Field>
@@ -154,7 +157,8 @@ type="number"
 inputMode="decimal"
 step="0.01"
 className={inputCls}
-value={form.annualInterestRate}
+placeholder="0"
+value={form.annualInterestRate === 0 ? "" : form.annualInterestRate}
 onChange={(e) =>
 set("annualInterestRate", Number(e.target.value))
 }
@@ -165,7 +169,8 @@ set("annualInterestRate", Number(e.target.value))
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.monthlyFee}
+placeholder="0"
+value={form.monthlyFee === 0 ? "" : form.monthlyFee}
 onChange={(e) => set("monthlyFee", Number(e.target.value))}
 />
 </Field>

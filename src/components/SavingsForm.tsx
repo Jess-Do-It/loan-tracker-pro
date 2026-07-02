@@ -54,7 +54,8 @@ onChange={(e) => set("name", e.target.value)}
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.goalAmount}
+placeholder="0"
+value={form.goalAmount === 0 ? "" : form.goalAmount}
 onChange={(e) => set("goalAmount", Number(e.target.value))}
 />
 </Field>
@@ -63,7 +64,8 @@ onChange={(e) => set("goalAmount", Number(e.target.value))}
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.currentAmount}
+placeholder="0"
+value={form.currentAmount === 0 ? "" : form.currentAmount}
 onChange={(e) => set("currentAmount", Number(e.target.value))}
 />
 </Field>
@@ -80,7 +82,8 @@ onChange={(e) => set("targetDate", e.target.value)}
 type="number"
 inputMode="decimal"
 className={inputCls}
-value={form.monthlyContribution}
+placeholder="0"
+value={form.monthlyContribution === 0 ? "" : form.monthlyContribution}
 onChange={(e) => set("monthlyContribution", Number(e.target.value))}
 />
 </Field>
