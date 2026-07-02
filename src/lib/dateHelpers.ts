@@ -28,7 +28,11 @@ return monthKey(new Date());
 }
 
 export function isoDate(d: Date): string {
-return d.toISOString().slice(0, 10);
+// Build from LOCAL date parts — toISOString() converts to UTC and can shift the
+// day by one for timezones offset from UTC.
+return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+d.getDate(),
+).padStart(2, "0")}`;
 }
 
 export function dateInMonth(monthK: string, day: number): string {
@@ -44,6 +48,9 @@ return out;
 }
 
 export function formatDay(iso: string): string {
-const d = new Date(iso);
+// Parse the yyyy-mm-dd string as a LOCAL date — new Date("yyyy-mm-dd") parses as
+// UTC midnight, which can render as the previous day in negative-offset zones.
+const [y, m, day] = iso.split("-").map(Number);
+const d = new Date(y, m - 1, day);
 return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
 }

@@ -72,6 +72,20 @@ if (updated) persist(() => persistLoan({ data: updated as Loan }));
 return updated;
 }
 
+// Add a payment toward closing a loan: increases its totalPaid by `amount`.
+// Used when an expense is logged against the "loan" category.
+export function addLoanPayment(id: number, amount: number): Loan | undefined {
+let updated: Loan | undefined;
+loans = loans.map((l) => {
+if (l.id !== id) return l;
+updated = { ...l, totalPaid: l.totalPaid + amount };
+return updated;
+});
+emit();
+if (updated) persist(() => persistLoan({ data: updated as Loan }));
+return updated;
+}
+
 export function archiveLoan(id: number) {
 let archived: Loan | undefined;
 loans = loans.map((l) => {

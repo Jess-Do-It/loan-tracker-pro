@@ -7,7 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 
 import type { Loan } from "@/types/loan";
-import type { Expense } from "@/types/expense";
+import type { Expense, RecurringExpense } from "@/types/expense";
 import type { SavingsGoal } from "@/types/savings";
 
 export const loadAllData = createServerFn({ method: "GET" }).handler(async () => {
@@ -41,6 +41,13 @@ export const removeExpense = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { deleteExpenseRow } = await import("@/server/db");
     deleteExpenseRow(data);
+  });
+
+export const persistRecurring = createServerFn({ method: "POST" })
+  .validator((r: RecurringExpense) => r)
+  .handler(async ({ data }) => {
+    const { upsertRecurring } = await import("@/server/db");
+    upsertRecurring(data);
   });
 
 export const persistSavings = createServerFn({ method: "POST" })

@@ -9,7 +9,8 @@ YAxis,
 Tooltip,
 ResponsiveContainer,
 } from "recharts";
-import { CATEGORY_META, type ExpenseCategory } from "@/types/expense";
+import { type ExpenseCategory } from "@/types/expense";
+import { useCategoryMeta } from "@/services/categoryService";
 import { useExpenses } from "@/services/expenseService";
 import { lastNMonths, shortMonth } from "@/lib/dateHelpers";
 import { CategoryIcon } from "@/components/CategoryIcon";
@@ -23,7 +24,7 @@ component: CategoryDrilldownPage,
 function CategoryDrilldownPage() {
 const { category } = useParams({ from: "/charts/category/$category" });
 const cat = category as ExpenseCategory;
-const meta = CATEGORY_META[cat];
+const meta = useCategoryMeta()[cat];
 const expenses = useExpenses();
 
 const data = useMemo(() => {

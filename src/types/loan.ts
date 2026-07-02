@@ -7,6 +7,7 @@ loanType: LoanType;
 lender?: string;
 
 currentBalance: number;
+totalPaid: number; // amount paid so far toward closing the loan
 monthlyPayment: number;
 annualInterestRate: number;
 monthlyFee: number;
@@ -32,6 +33,7 @@ name: string;
 loanType: LoanType;
 lender?: string;
 currentBalance: number;
+totalPaid: number;
 monthlyPayment: number;
 annualInterestRate: number;
 monthlyFee: number;

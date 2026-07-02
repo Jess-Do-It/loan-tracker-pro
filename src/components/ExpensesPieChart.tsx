@@ -8,11 +8,13 @@ ResponsiveContainer,
 Tooltip,
 } from "recharts";
 import type { Expense } from "@/types/expense";
-import { CATEGORY_META, type ExpenseCategory } from "@/types/expense";
+import { type ExpenseCategory } from "@/types/expense";
+import { useCategoryMeta } from "@/services/categoryService";
 import { formatMoney } from "./MoneyText";
 
 export function ExpensesPieChart({ records }: { records: Expense[] }) {
 const navigate = useNavigate();
+const categoryMeta = useCategoryMeta();
 const { data, total } = useMemo(() => {
 const map = new Map<ExpenseCategory, number>();
 records.forEach((r) =>
@@ -21,14 +23,14 @@ map.set(r.category, (map.get(r.category) ?? 0) + r.amount),
 const arr = Array.from(map.entries())
 .map(([category, value]) => ({
 category,
-name: CATEGORY_META[category].label,
+name: categoryMeta[category].label,
 value,
-color: CATEGORY_META[category].color,
+color: categoryMeta[category].color,
 }))
 .sort((a, b) => b.value - a.value);
 const total = arr.reduce((s, x) => s + x.value, 0);
 return { data: arr, total };
-}, [records]);
+}, [records, categoryMeta]);
 
 if (total === 0) {
 return (

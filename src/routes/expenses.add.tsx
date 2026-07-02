@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import { ChevronLeft } from "lucide-react";
 import { z } from "zod";
 import { ExpenseForm } from "@/components/ExpenseForm";
-import { addExpense } from "@/services/expenseService";
+import { recordExpense } from "@/services/expenseService";
 import { dateInMonth } from "@/lib/dateHelpers";
 
 const searchSchema = z.object({ month: z.string().optional() });
@@ -36,8 +36,8 @@ Log a one-off purchase.
 submitLabel="Save Expense"
 defaultDate={defaultDate}
 onCancel={() => navigate({ to: "/" })}
-onSubmit={(input) => {
-addExpense(input);
+onSubmit={(input, opts) => {
+recordExpense(input, opts);
 navigate({ to: "/" });
 }}
 />

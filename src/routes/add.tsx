@@ -5,7 +5,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { ExpenseForm } from "@/components/ExpenseForm";
 import { LoanForm } from "@/components/LoanForm";
 import { SavingsForm } from "@/components/SavingsForm";
-import { addExpense } from "@/services/expenseService";
+import { recordExpense } from "@/services/expenseService";
 import { addLoan } from "@/services/loanService";
 import { addSavingsGoal } from "@/services/savingsService";
 
@@ -61,8 +61,8 @@ active
 <ExpenseForm
 submitLabel="Save Expense"
 onCancel={() => navigate({ to: "/" })}
-onSubmit={(input) => {
-addExpense(input);
+onSubmit={(input, opts) => {
+recordExpense(input, opts);
 navigate({ to: "/" });
 }}
 />

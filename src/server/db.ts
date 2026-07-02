@@ -15,10 +15,12 @@ import { join } from "node:path";
 import type { Loan } from "@/types/loan";
 import type { Expense, RecurringExpense } from "@/types/expense";
 import type { SavingsGoal } from "@/types/savings";
+import type { CategoryRecord } from "@/lib/categoryData";
 
 import { mockLoans } from "@/lib/mockLoans";
 import { mockExpenses, mockRecurring } from "@/lib/mockExpenses";
 import { mockSavings } from "@/lib/mockSavings";
+import { categorySeed } from "@/lib/categoryData";
 
 // Minimal structural shape shared by node:sqlite (DatabaseSync) and bun:sqlite
 // (Database). We only rely on the intersection of their APIs.
@@ -68,6 +70,7 @@ function migrate(d: SqliteDb) {
       loanType           TEXT    NOT NULL,
       lender             TEXT,
       currentBalance     REAL    NOT NULL,
+      totalPaid          REAL    NOT NULL DEFAULT 0,
       monthlyPayment     REAL    NOT NULL,
       annualInterestRate REAL    NOT NULL,
       monthlyFee         REAL    NOT NULL,
@@ -85,14 +88,15 @@ function migrate(d: SqliteDb) {
     );
 
     CREATE TABLE IF NOT EXISTS expenses (
-      id           INTEGER PRIMARY KEY,
-      name         TEXT    NOT NULL,
-      amount       REAL    NOT NULL,
-      category     TEXT    NOT NULL,
-      date         TEXT    NOT NULL,
-      recurringId  INTEGER,
-      sourceLoanId INTEGER,
-      note         TEXT
+      id              INTEGER PRIMARY KEY,
+      name            TEXT    NOT NULL,
+      amount          REAL    NOT NULL,
+      category        TEXT    NOT NULL,
+      date            TEXT    NOT NULL,
+      recurringId     INTEGER,
+      sourceLoanId    INTEGER,
+      sourceSavingsId INTEGER,
+      note            TEXT
     );
 
     CREATE TABLE IF NOT EXISTS recurring (
@@ -112,7 +116,30 @@ function migrate(d: SqliteDb) {
       monthlyContribution REAL    NOT NULL,
       color               TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS categories (
+      key       TEXT    PRIMARY KEY,
+      label     TEXT    NOT NULL,
+      icon      TEXT    NOT NULL,
+      color     TEXT    NOT NULL,
+      tint      TEXT    NOT NULL,
+      text      TEXT    NOT NULL,
+      sortOrder INTEGER NOT NULL
+    );
   `);
+
+  // Additive migrations for databases created before a column existed.
+  ensureColumn(d, "loans", "totalPaid", "REAL NOT NULL DEFAULT 0");
+  ensureColumn(d, "expenses", "sourceSavingsId", "INTEGER");
+}
+
+// Adds a column to an existing table if it isn't already present (CREATE TABLE
+// IF NOT EXISTS never alters an existing table, so new columns need this).
+function ensureColumn(d: SqliteDb, table: string, column: string, decl: string) {
+  const cols = d.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    d.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${decl}`);
+  }
 }
 
 function seedIfEmpty(d: SqliteDb) {
@@ -123,6 +150,10 @@ function seedIfEmpty(d: SqliteDb) {
   if (count("recurring") === 0) mockRecurring.forEach((r) => insertRecurring(d, r));
   if (count("expenses") === 0) mockExpenses.forEach((e) => insertExpense(d, e));
   if (count("savings") === 0) mockSavings.forEach((g) => insertSavings(d, g));
+  // Categories are read-only reference data, so keep them in sync with the seed
+  // on every boot (INSERT OR REPLACE) — this adds newly-defined categories to
+  // existing databases without wiping the transactional tables.
+  categorySeed.forEach((c) => insertCategory(d, c));
 }
 
 /* ---------- row <-> object mapping ---------- */
@@ -137,6 +168,7 @@ function rowToLoan(r: Record<string, unknown>): Loan {
     loanType: r.loanType as Loan["loanType"],
     lender: (r.lender as string) ?? undefined,
     currentBalance: r.currentBalance as number,
+    totalPaid: (r.totalPaid as number) ?? 0,
     monthlyPayment: r.monthlyPayment as number,
     annualInterestRate: r.annualInterestRate as number,
     monthlyFee: r.monthlyFee as number,
@@ -163,6 +195,7 @@ function rowToExpense(r: Record<string, unknown>): Expense {
     date: r.date as string,
     recurringId: (r.recurringId as number) ?? undefined,
     sourceLoanId: (r.sourceLoanId as number) ?? undefined,
+    sourceSavingsId: (r.sourceSavingsId as number) ?? undefined,
     note: (r.note as string) ?? undefined,
   };
 }
@@ -189,17 +222,29 @@ function rowToSavings(r: Record<string, unknown>): SavingsGoal {
   };
 }
 
+function rowToCategory(r: Record<string, unknown>): CategoryRecord {
+  return {
+    key: r.key as CategoryRecord["key"],
+    label: r.label as string,
+    icon: r.icon as string,
+    color: r.color as string,
+    tint: r.tint as string,
+    text: r.text as string,
+    sortOrder: r.sortOrder as number,
+  };
+}
+
 /* ---------- insert helpers (also used for seeding) ---------- */
 
 function insertLoan(d: SqliteDb, l: Loan) {
   d.prepare(
     `INSERT OR REPLACE INTO loans
-      (id, name, loanType, lender, currentBalance, monthlyPayment, annualInterestRate,
+      (id, name, loanType, lender, currentBalance, totalPaid, monthlyPayment, annualInterestRate,
        monthlyFee, dueDay, isAutopay, notes, monthsToPayoff, yearsToPayoff, remainingMonths,
        totalInterest, totalFees, totalPayable, totalCost, isActive)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   ).run(
-    l.id, l.name, l.loanType, opt(l.lender), l.currentBalance, l.monthlyPayment,
+    l.id, l.name, l.loanType, opt(l.lender), l.currentBalance, l.totalPaid, l.monthlyPayment,
     l.annualInterestRate, l.monthlyFee, opt(l.dueDay), bool(l.isAutopay), opt(l.notes),
     l.monthsToPayoff, l.yearsToPayoff, l.remainingMonths, l.totalInterest, l.totalFees,
     l.totalPayable, l.totalCost, bool(l.isActive),
@@ -209,9 +254,9 @@ function insertLoan(d: SqliteDb, l: Loan) {
 function insertExpense(d: SqliteDb, e: Expense) {
   d.prepare(
     `INSERT OR REPLACE INTO expenses
-      (id, name, amount, category, date, recurringId, sourceLoanId, note)
-     VALUES (?,?,?,?,?,?,?,?)`,
-  ).run(e.id, e.name, e.amount, e.category, e.date, opt(e.recurringId), opt(e.sourceLoanId), opt(e.note));
+      (id, name, amount, category, date, recurringId, sourceLoanId, sourceSavingsId, note)
+     VALUES (?,?,?,?,?,?,?,?,?)`,
+  ).run(e.id, e.name, e.amount, e.category, e.date, opt(e.recurringId), opt(e.sourceLoanId), opt(e.sourceSavingsId), opt(e.note));
 }
 
 function insertRecurring(d: SqliteDb, r: RecurringExpense) {
@@ -229,6 +274,13 @@ function insertSavings(d: SqliteDb, g: SavingsGoal) {
   ).run(g.id, g.name, g.goalAmount, g.currentAmount, opt(g.targetDate), g.monthlyContribution, opt(g.color));
 }
 
+function insertCategory(d: SqliteDb, c: CategoryRecord) {
+  d.prepare(
+    `INSERT OR REPLACE INTO categories (key, label, icon, color, tint, text, sortOrder)
+     VALUES (?,?,?,?,?,?,?)`,
+  ).run(c.key, c.label, c.icon, c.color, c.tint, c.text, c.sortOrder);
+}
+
 /* ---------- public API (server-side, synchronous) ---------- */
 
 export function readAll() {
@@ -238,11 +290,16 @@ export function readAll() {
     expenses: (d.prepare("SELECT * FROM expenses").all() as Record<string, unknown>[]).map(rowToExpense),
     recurring: (d.prepare("SELECT * FROM recurring").all() as Record<string, unknown>[]).map(rowToRecurring),
     savings: (d.prepare("SELECT * FROM savings").all() as Record<string, unknown>[]).map(rowToSavings),
+    categories: (d.prepare("SELECT * FROM categories ORDER BY sortOrder").all() as Record<string, unknown>[]).map(rowToCategory),
   };
 }
 
 export function upsertLoan(l: Loan) {
   insertLoan(getDb(), l);
+}
+
+export function upsertRecurring(r: RecurringExpense) {
+  insertRecurring(getDb(), r);
 }
 
 export function deleteLoanRow(id: number) {

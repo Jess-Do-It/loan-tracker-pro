@@ -1,4 +1,5 @@
-import { CATEGORY_META, type ExpenseCategory } from "@/types/expense";
+import { type ExpenseCategory } from "@/types/expense";
+import { useCategoryMeta } from "@/services/categoryService";
 import { cn } from "@/lib/utils";
 
 export function CategoryIcon({
@@ -10,7 +11,7 @@ category: ExpenseCategory;
 size?: "sm" | "md" | "lg";
 className?: string;
 }) {
-const meta = CATEGORY_META[category];
+const meta = useCategoryMeta()[category];
 const Icon = meta.icon;
 const dims =
 size === "sm" ? "size-8" : size === "lg" ? "size-12" : "size-10";

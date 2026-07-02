@@ -52,6 +52,20 @@ emit();
 if (updated) persist(() => persistSavings({ data: updated as SavingsGoal }));
 }
 
+// Add a contribution to a savings goal: increases its currentAmount by `amount`.
+// Used when an expense is logged against the "savings" category.
+export function addSavingsContribution(id: number, amount: number): SavingsGoal | undefined {
+let updated: SavingsGoal | undefined;
+goals = goals.map((g) => {
+if (g.id !== id) return g;
+updated = { ...g, currentAmount: g.currentAmount + amount };
+return updated;
+});
+emit();
+if (updated) persist(() => persistSavings({ data: updated as SavingsGoal }));
+return updated;
+}
+
 export function deleteSavingsGoal(id: number) {
 goals = goals.filter((g) => g.id !== id);
 emit();

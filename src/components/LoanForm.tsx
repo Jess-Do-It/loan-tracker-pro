@@ -17,6 +17,7 @@ name: "",
 loanType: "loan",
 lender: "",
 currentBalance: 0,
+totalPaid: 0,
 monthlyPayment: 0,
 annualInterestRate: 0,
 monthlyFee: 0,
@@ -39,6 +40,7 @@ name: initial.name,
 loanType: initial.loanType,
 lender: initial.lender ?? "",
 currentBalance: initial.currentBalance,
+totalPaid: initial.totalPaid,
 monthlyPayment: initial.monthlyPayment,
 annualInterestRate: initial.annualInterestRate,
 monthlyFee: initial.monthlyFee,
@@ -58,6 +60,7 @@ function validate(): boolean {
 const e: Record<string, string> = {};
 if (!form.name.trim()) e.name = "Name is required";
 if (form.currentBalance < 0) e.currentBalance = "Must be ≥ 0";
+if (form.totalPaid < 0) e.totalPaid = "Cannot be negative";
 if (form.monthlyPayment <= 0) e.monthlyPayment = "Must be greater than 0";
 if (form.annualInterestRate < 0) e.annualInterestRate = "Cannot be negative";
 if (form.monthlyFee < 0) e.monthlyFee = "Cannot be negative";
@@ -125,6 +128,15 @@ inputMode="decimal"
 className={inputCls}
 value={form.currentBalance}
 onChange={(e) => set("currentBalance", Number(e.target.value))}
+/>
+</Field>
+<Field label="Total paid" error={errors.totalPaid}>
+<input
+type="number"
+inputMode="decimal"
+className={inputCls}
+value={form.totalPaid}
+onChange={(e) => set("totalPaid", Number(e.target.value))}
 />
 </Field>
 <Field label="Monthly payment" error={errors.monthlyPayment}>
