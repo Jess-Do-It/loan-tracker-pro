@@ -9,7 +9,7 @@ ResponsiveContainer,
 Legend,
 } from "recharts";
 import type { Loan } from "@/types/loan";
-import { formatMoney } from "./MoneyText";
+import { formatMoney } from "@/components/common/MoneyText";
 
 type View = "monthly" | "split" | "paid";
 

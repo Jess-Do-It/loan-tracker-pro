@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import type { Loan, LoanInput } from "@/types/loan";
-import { mockLoans } from "@/lib/mockLoans";
+import { mockLoans } from "@/lib/mock-data/mockLoans";
 import { calculateLoanPreview } from "@/lib/loanCalculations";
 import { hydrate, persist } from "./persistence";
 import { persistLoan } from "./dataFns";

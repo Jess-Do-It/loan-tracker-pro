@@ -3,7 +3,7 @@ import type { Expense, ExpenseInput, ExpenseCategory } from "@/types/expense";
 import { useCategories } from "@/services/categoryService";
 import { useLoans } from "@/services/loanService";
 import { useSavings } from "@/services/savingsService";
-import { CategoryIcon } from "./CategoryIcon";
+import { CategoryIcon } from "@/components/expenses/CategoryIcon";
 import { isoDate } from "@/lib/dateHelpers";
 
 type Props = {

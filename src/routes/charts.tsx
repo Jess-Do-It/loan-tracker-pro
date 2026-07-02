@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { MobileShell } from "@/components/MobileShell";
-import { MonthSwitcher } from "@/components/MonthSwitcher";
-import { ExpensesPieChart } from "@/components/ExpensesPieChart";
-import { LoanColumnChart } from "@/components/LoanColumnChart";
-import { SavingsBucket } from "@/components/SavingsBucket";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { MonthSwitcher } from "@/components/expenses/MonthSwitcher";
+import { ExpensesPieChart } from "@/components/expenses/ExpensesPieChart";
+import { LoanColumnChart } from "@/components/loans/LoanColumnChart";
+import { SavingsBucket } from "@/components/savings/SavingsBucket";
 import { useExpenses } from "@/services/expenseService";
 import { useLoans } from "@/services/loanService";
 import { useSavings } from "@/services/savingsService";

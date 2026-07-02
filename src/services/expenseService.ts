@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import type { Expense, ExpenseInput, RecurringExpense } from "@/types/expense";
-import { mockExpenses, mockRecurring } from "@/lib/mockExpenses";
+import { mockExpenses, mockRecurring } from "@/lib/mock-data/mockExpenses";
 import { isoDate } from "@/lib/dateHelpers";
 import { hydrate, persist } from "./persistence";
 import { persistExpense, removeExpense, persistRecurring } from "./dataFns";

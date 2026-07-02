@@ -1,4 +1,4 @@
-import { MoneyText } from "./MoneyText";
+import { MoneyText } from "@/components/common/MoneyText";
 
 type Props = {
 principal: number;

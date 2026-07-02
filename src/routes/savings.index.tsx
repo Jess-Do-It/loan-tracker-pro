@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus, PiggyBank } from "lucide-react";
-import { MobileShell } from "@/components/MobileShell";
-import { SavingsBucket } from "@/components/SavingsBucket";
-import { MoneyText } from "@/components/MoneyText";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { SavingsBucket } from "@/components/savings/SavingsBucket";
+import { MoneyText } from "@/components/common/MoneyText";
 import { useSavings } from "@/services/savingsService";
 
 export const Route = createFileRoute("/savings/")({

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { z } from "zod";
-import { ExpenseForm } from "@/components/ExpenseForm";
+import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { recordExpense } from "@/services/expenseService";
 import { dateInMonth } from "@/lib/dateHelpers";
 

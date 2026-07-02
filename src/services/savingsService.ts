@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import type { SavingsGoal, SavingsGoalInput } from "@/types/savings";
-import { mockSavings } from "@/lib/mockSavings";
+import { mockSavings } from "@/lib/mock-data/mockSavings";
 import { hydrate, persist } from "./persistence";
 import { persistSavings, removeSavings } from "./dataFns";
 

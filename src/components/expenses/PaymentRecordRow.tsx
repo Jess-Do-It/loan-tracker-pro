@@ -1,7 +1,7 @@
 import { Trash2 } from "lucide-react";
 import type { Expense } from "@/types/expense";
-import { CategoryIcon } from "./CategoryIcon";
-import { MoneyText } from "./MoneyText";
+import { CategoryIcon } from "@/components/expenses/CategoryIcon";
+import { MoneyText } from "@/components/common/MoneyText";
 import { formatDay } from "@/lib/dateHelpers";
 import { deleteExpense } from "@/services/expenseService";
 

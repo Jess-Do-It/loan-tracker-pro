@@ -1,5 +1,5 @@
 import type { Expense, RecurringExpense } from "@/types/expense";
-import { currentMonthKey, dateInMonth, shiftMonth } from "./dateHelpers";
+import { currentMonthKey, dateInMonth, shiftMonth } from "@/lib/dateHelpers";
 
 export const mockRecurring: RecurringExpense[] = [
 { id: 1, name: "Rent", amount: 12000, category: "rent", dayOfMonth: 1 },

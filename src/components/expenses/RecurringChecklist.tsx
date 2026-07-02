@@ -8,8 +8,8 @@ toggleRecurringRecorded,
 toggleLoanRecorded,
 useExpenses,
 } from "@/services/expenseService";
-import { CategoryIcon } from "./CategoryIcon";
-import { MoneyText } from "./MoneyText";
+import { CategoryIcon } from "@/components/expenses/CategoryIcon";
+import { MoneyText } from "@/components/common/MoneyText";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const REMOVE_DELAY_MS = 350;

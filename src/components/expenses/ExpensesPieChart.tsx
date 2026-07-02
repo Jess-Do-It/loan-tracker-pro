@@ -10,7 +10,7 @@ Tooltip,
 import type { Expense } from "@/types/expense";
 import { type ExpenseCategory } from "@/types/expense";
 import { useCategoryMeta } from "@/services/categoryService";
-import { formatMoney } from "./MoneyText";
+import { formatMoney } from "@/components/common/MoneyText";
 
 export function ExpensesPieChart({ records }: { records: Expense[] }) {
 const navigate = useNavigate();

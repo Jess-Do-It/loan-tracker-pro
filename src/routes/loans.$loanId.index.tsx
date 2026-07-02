@@ -3,8 +3,8 @@ import { Archive, ChevronLeft, Pencil } from "lucide-react";
 import { archiveLoan, useLoan } from "@/services/loanService";
 import { LOAN_TYPE_LABELS } from "@/types/loan";
 import { formatPayoff } from "@/lib/loanCalculations";
-import { MoneyText } from "@/components/MoneyText";
-import { StackedDebtBar } from "@/components/StackedDebtBar";
+import { MoneyText } from "@/components/common/MoneyText";
+import { StackedDebtBar } from "@/components/loans/StackedDebtBar";
 
 export const Route = createFileRoute("/loans/$loanId/")({
 head: () => ({

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
-import { SavingsForm } from "@/components/SavingsForm";
+import { SavingsForm } from "@/components/savings/SavingsForm";
 import { addSavingsGoal } from "@/services/savingsService";
 
 export const Route = createFileRoute("/savings/add")({

@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { Loan } from "@/types/loan";
 import { LOAN_TYPE_LABELS } from "@/types/loan";
-import { MoneyText } from "./MoneyText";
+import { MoneyText } from "@/components/common/MoneyText";
 import { formatPayoff } from "@/lib/loanCalculations";
 
 export function LoanCard({ loan }: { loan: Loan }) {

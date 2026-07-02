@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { MobileShell } from "@/components/MobileShell";
-import { MonthSwitcher } from "@/components/MonthSwitcher";
-import { RecurringChecklist } from "@/components/RecurringChecklist";
-import { PaymentRecordRow } from "@/components/PaymentRecordRow";
-import { MoneyText } from "@/components/MoneyText";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { MonthSwitcher } from "@/components/expenses/MonthSwitcher";
+import { RecurringChecklist } from "@/components/expenses/RecurringChecklist";
+import { PaymentRecordRow } from "@/components/expenses/PaymentRecordRow";
+import { MoneyText } from "@/components/common/MoneyText";
 import { useExpenses } from "@/services/expenseService";
 import { currentMonthKey, formatDay } from "@/lib/dateHelpers";
 

@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
-import { MobileShell } from "@/components/MobileShell";
-import { LoanCard } from "@/components/LoanCard";
-import { EmptyState } from "@/components/EmptyState";
-import { MoneyText } from "@/components/MoneyText";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { LoanCard } from "@/components/loans/LoanCard";
+import { EmptyState } from "@/components/common/EmptyState";
+import { MoneyText } from "@/components/common/MoneyText";
 import { useLoans } from "@/services/loanService";
 import { calculateDashboardSummary, formatPayoff } from "@/lib/loanCalculations";
 

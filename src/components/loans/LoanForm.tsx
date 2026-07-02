@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Loan, LoanInput, LoanType } from "@/types/loan";
 import { LOAN_TYPE_LABELS } from "@/types/loan";
 import { calculateLoanPreview, formatPayoff } from "@/lib/loanCalculations";
-import { MoneyText } from "./MoneyText";
+import { MoneyText } from "@/components/common/MoneyText";
 
 type Props = {
 initial?: Loan;

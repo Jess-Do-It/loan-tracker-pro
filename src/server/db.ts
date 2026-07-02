@@ -17,9 +17,9 @@ import type { Expense, RecurringExpense } from "@/types/expense";
 import type { SavingsGoal } from "@/types/savings";
 import type { CategoryRecord } from "@/lib/categoryData";
 
-import { mockLoans } from "@/lib/mockLoans";
-import { mockExpenses, mockRecurring } from "@/lib/mockExpenses";
-import { mockSavings } from "@/lib/mockSavings";
+import { mockLoans } from "@/lib/mock-data/mockLoans";
+import { mockExpenses, mockRecurring } from "@/lib/mock-data/mockExpenses";
+import { mockSavings } from "@/lib/mock-data/mockSavings";
 import { categorySeed } from "@/lib/categoryData";
 
 // Minimal structural shape shared by node:sqlite (DatabaseSync) and bun:sqlite

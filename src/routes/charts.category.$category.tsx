@@ -13,8 +13,8 @@ import { type ExpenseCategory } from "@/types/expense";
 import { useCategoryMeta } from "@/services/categoryService";
 import { useExpenses } from "@/services/expenseService";
 import { lastNMonths, shortMonth } from "@/lib/dateHelpers";
-import { CategoryIcon } from "@/components/CategoryIcon";
-import { formatMoney } from "@/components/MoneyText";
+import { CategoryIcon } from "@/components/expenses/CategoryIcon";
+import { formatMoney } from "@/components/common/MoneyText";
 
 export const Route = createFileRoute("/charts/category/$category")({
 head: () => ({ meta: [{ title: "Category — Charts" }] }),

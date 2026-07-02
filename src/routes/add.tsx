@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Receipt, Wallet, PiggyBank } from "lucide-react";
-import { MobileShell } from "@/components/MobileShell";
-import { ExpenseForm } from "@/components/ExpenseForm";
-import { LoanForm } from "@/components/LoanForm";
-import { SavingsForm } from "@/components/SavingsForm";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { ExpenseForm } from "@/components/expenses/ExpenseForm";
+import { LoanForm } from "@/components/loans/LoanForm";
+import { SavingsForm } from "@/components/savings/SavingsForm";
 import { recordExpense } from "@/services/expenseService";
 import { addLoan } from "@/services/loanService";
 import { addSavingsGoal } from "@/services/savingsService";

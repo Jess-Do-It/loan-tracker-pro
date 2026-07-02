@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 import type { SavingsGoal } from "@/types/savings";
-import { MoneyText } from "./MoneyText";
+import { MoneyText } from "@/components/common/MoneyText";
 
 export function SavingsBucket({ goal }: { goal: SavingsGoal }) {
 const pct = Math.min(100, (goal.currentAmount / goal.goalAmount) * 100);

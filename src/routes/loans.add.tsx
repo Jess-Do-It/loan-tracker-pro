@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
-import { LoanForm } from "@/components/LoanForm";
+import { LoanForm } from "@/components/loans/LoanForm";
 import { addLoan } from "@/services/loanService";
 
 export const Route = createFileRoute("/loans/add")({

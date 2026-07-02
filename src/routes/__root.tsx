@@ -10,7 +10,7 @@ Scripts,
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportLovableError } from "../lib/error/lovable-error-reporting";
 
 function NotFoundComponent() {
 return (
